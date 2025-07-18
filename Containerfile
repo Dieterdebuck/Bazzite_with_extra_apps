@@ -16,6 +16,12 @@ FROM registry.fedoraproject.org/fedora:latest AS builder
 # --- Stage 1: Builder ---
 FROM registry.fedoraproject.org/fedora:latest AS builder
 
+# This will copy everything from your local 'files' directory
+# into the root '/' of the image. Since 'files' contains 'usr/local/include',
+# it will correctly place your files there.
+COPY files/ /
+
+
 # Install build dependencies for huenicorn AND OpenCV development files
 # 'opencv-devel' is the key package for CMake to find OpenCV.
 RUN dnf update -y && \
@@ -115,10 +121,7 @@ RUN bootc container lint
 ## the following RUN directive does all the things required to run "build.sh" as recommended.
 
 
-# This will copy everything from your local 'files' directory
-# into the root '/' of the image. Since 'files' contains 'usr/local/include',
-# it will correctly place your files there.
-COPY files/ /
+
 
 # Add any other customizations here, like installing additional packages
 # Example:
