@@ -8,15 +8,15 @@ COPY build_files /
 # --- Stage 1: Builder ---
 # This stage is dedicated to COMPILING the 'huenicorn' application.
 # It uses a full Fedora image because compilation requires various development tools,
-# compilers (gcc-c++), and header files (-devel packages).
+# compilers (gcc-c++) and header files (-devel packages).
 # IMPORTANT: This stage's image and tools are TEMPORARY and will NOT be part of your final bootc system.
 FROM registry.fedoraproject.org/fedora:latest AS builder
 
 # Ensure .gnupg directory exists and has correct permissions for dnf/gpg operations
-# This might help with the "can't create directory '/root/.gnupg'" error
+# This might help with the "can't create directory '/root/.gnupg'" error in the builder stage.
 RUN mkdir -p /root/.gnupg && chmod 700 /root/.gnupg
 
-# Add RPM Fusion repositories.
+# Add RPM Fusion repositories for the builder stage.
 RUN dnf install -y \
     https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
@@ -26,7 +26,6 @@ RUN dnf install -y \
 COPY files/ /
 
 # Install ALL necessary build dependencies for huenicorn.
-# Check for 'asio-devel' package as it's the one that causes issues, but it should be correct for build.
 RUN dnf update -y && \
     dnf install -y \
         git \
@@ -65,34 +64,12 @@ RUN mkdir build && cd build && cmake .. && make
 
 
 # --- Stage 2: Final Bootc Image ---
+# Start from your desired Bazzite base image.
 FROM ghcr.io/ublue-os/bazzite-deck:latest
 
-# Add RPM Fusion repositories to the final image for runtime libraries.
-RUN dnf install -y \
-    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
-    && dnf update -y
-
-# Install ONLY runtime dependencies for huenicorn.
-# We're removing the packages that were already reported as "installed".
-# For 'asio', the runtime library is often part of 'asio-devel' itself,
-# or it might be called 'boost-asio' if it's part of Boost.
-# Given 'nlohmann-json-devel' is header-only and has no runtime, 'asio' might be similar,
-# or its runtime is simply not packaged separately as 'asio'.
-# Let's remove 'asio' from the runtime install list, as the build error "No match for argument: asio"
-# suggests a dedicated runtime package 'asio' does not exist.
-# The 'asio-devel' package *does* provide the necessary headers and static libs for linking.
-RUN dnf install -y --skip-unavailable \
-    ffmpeg \             # Likely needed
-    gstreamer1-plugins-base \ # Likely needed
-    libva \              # Likely needed
-    libvdpau \           # Likely needed
-    mesa-libGL \         # Likely needed
-    libdrm \             # Likely needed
-    libXext \            # Likely needed
-    libXrandr \          # Likely needed
-    && \
-    dnf clean all
+# IMPORTANT: DO NOT use 'dnf install' here for layering packages.
+# The Universal Blue template uses a 'packages' file and the 'build.sh' script with 'rpm-ostree'.
+# The previous problematic 'RUN dnf install' blocks have been removed from here.
 
 # Copy the compiled huenicorn executable from the 'builder' stage to the final image.
 COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
@@ -106,10 +83,12 @@ RUN systemctl enable huenicorn.service
 RUN bootc container lint
 
 # --- Universal Blue Template Boilerplate ---
-# Commented out as before, unless you are actively using the build.sh script.
-# RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-#     --mount=type=cache,dst=/var/cache \
-#     --mount=type=cache,dst=/var/log \
-#     --mount=type=tmpfs,dst=/tmp \
-#     /ctx/build.sh && \
-#     ostree container commit
+# THIS SECTION MUST BE UNCOMMENTED AND USED FOR PACKAGE LAYERING
+# It uses the 'packages' file (see below for 'packages' file content).
+# This is how packages are properly layered onto an immutable OS like Bazzite.
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/build.sh && \
+    ostree container commit

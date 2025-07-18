@@ -1,0 +1,17 @@
+# packages file content
+# These will be layered onto the Bazzite image using rpm-ostree by build.sh
+
+# RPM Fusion repositories (often handled by the template's build.sh, but good to include)
+rpmfusion-free-release
+rpmfusion-nonfree-release
+
+# Your Huenicorn runtime dependencies
+opencv
+ffmpeg
+gstreamer1-plugins-base
+libva
+libvdpau
+mesa-libGL
+libdrm
+libXext
+libXrandr
