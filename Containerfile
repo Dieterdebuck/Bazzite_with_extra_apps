@@ -64,19 +64,12 @@ ENV GIT_CURL_VERBOSE=1
 # Clone the huenicorn source code from its Git repository.
 RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git /app/huenicorn
 
-RUN ls -l /app/huenicorn/webroot/
+ls -l /app/huenicorn/build/
 
 # Create a 'build' directory, navigate into it, configure the build with CMake, and then compile the project with Make.
 WORKDIR /app/huenicorn
 RUN mkdir build && cd build && cmake .. && make
 RUN ls -l /app/huenicorn/build/
-
-
-# Copy the compiled huenicorn executable from the 'builder' stage to the final image.
-COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
-
-# Copy the webroot directory to a shared location where the service can find it.
-COPY --from=builder /app/huenicorn/webroot /usr/local/share/huenicorn/webroot
 
 # --- Stage 2: Final Bootc Image ---
 # Start from your desired Bazzite base image.
