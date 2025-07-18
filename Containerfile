@@ -13,6 +13,22 @@ FROM registry.fedoraproject.org/fedora:latest AS builder
 # We use 'dnf' as Fedora is the base for Bazzite.
 # 'gcc-c++' for the C++ compiler, 'git' for cloning, 'cmake' for configuration, 'make' for building.
 # '-devel' packages provide the necessary header files and static libraries for compilation.
+# --- Stage 1: Builder ---
+FROM registry.fedoraproject.org/fedora:latest AS builder
+
+# Install build dependencies for huenicorn AND OpenCV development files
+# 'opencv-devel' is the key package for CMake to find OpenCV.
+RUN dnf update -y && \
+    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusb-devel opencv-devel && \
+    dnf clean all
+
+# ... (rest of your huenicorn build steps) ...
+WORKDIR /app/huenicorn
+RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git .
+RUN mkdir build && cd build
+RUN cd build && cmake ..
+RUN cd build && make
+
 RUN dnf update -y && \
     dnf install -y git cmake gcc-c++ make curl-devel json-c-devel && \
     dnf clean all
