@@ -72,19 +72,29 @@ RUN mkdir build && cd build && cmake .. && make
 RUN ls -l /app/huenicorn/build/
 
 
+# Copy the compiled huenicorn executable from the 'builder' stage to the final image.
+COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
+
+# Copy the webroot directory to a shared location where the service can find it.
+COPY --from=builder /app/huenicorn/webroot /usr/local/share/huenicorn/webroot
+
 # --- Stage 2: Final Bootc Image ---
 # Start from your desired Bazzite base image.
 FROM ghcr.io/ublue-os/bazzite-deck:latest
 
-# IMPORTANT: DO NOT use 'dnf install' here for layering packages.
-# The Universal Blue template uses a 'packages' file and the 'build.sh' script with 'rpm-ostree'.
-# The previous problematic 'RUN dnf install' blocks have been removed from here.
+
 
 # Copy the compiled huenicorn executable from the 'builder' stage to the final image.
 COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
 
 # Copy the webroot directory to a shared location where the service can find it.
 COPY --from=builder /app/huenicorn/webroot /usr/local/share/huenicorn/webroot
+
+
+# IMPORTANT: DO NOT use 'dnf install' here for layering packages.
+# The Universal Blue template uses a 'packages' file and the 'build.sh' script with 'rpm-ostree'.
+# The previous problematic 'RUN dnf install' blocks have been removed from here.
+
 
 # Set up the systemd service for huenicorn.
 RUN mkdir -p /etc/systemd/system/ # Only needed if /etc/systemd/system/ doesn't exist, but safe to keep.
