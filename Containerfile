@@ -4,17 +4,14 @@ COPY build_files /
 
 # Base Image
 FROM ghcr.io/ublue-os/bazzite-deck:latest
+
 # --- Stage 1: Builder ---
 # Use a standard Fedora image for building. This stage will contain all build tools.
 # This image will NOT be part of your final bootc system.
-FROM registry.fedoraproject.org/fedora:latest AS builder
-
 # Install build dependencies for huenicorn
 # We use 'dnf' as Fedora is the base for Bazzite.
 # 'gcc-c++' for the C++ compiler, 'git' for cloning, 'cmake' for configuration, 'make' for building.
 # '-devel' packages provide the necessary header files and static libraries for compilation.
-# --- Stage 1: Builder ---
-FROM registry.fedoraproject.org/fedora:latest AS builder
 
 # Add RPM Fusion repositories for full multimedia support
 RUN dnf install -y \
@@ -61,42 +58,25 @@ RUN dnf update -y && \
 
     # --- DEBUGGING COMMANDS START HERE ---
 # List contents of /usr/share/cmake to see if OpenCV config files are there
-RUN ls -l /usr/share/cmake/OpenCV || true
-RUN ls -l /usr/share/opencv || true
+#RUN ls -l /usr/share/cmake/OpenCV || true
+#RUN ls -l /usr/share/opencv || true
 
 # Check if required libraries are installed and where they are
-RUN dnf list installed | grep -E "curl|json-c|libusbx|opencv" || true
+#RUN dnf list installed | grep -E "curl|json-c|libusbx|opencv" || true
 
 # Check CMake version
-RUN cmake --version
+#RUN cmake --version
 
 # Print current working directory and contents before cmake
-RUN pwd && ls -la
+#RUN pwd && ls -la
 
-# --- DEBUGGING COMMANDS END HERE ---
+# --- DEBUGGING COMMANDS ENDS HERE ---
 
-# ... (rest of your huenicorn build steps) ...
+# ... (rest of huenicorn build steps) ...
 WORKDIR /app/huenicorn
 RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git .
 RUN mkdir build && cd build
 RUN cd build && cmake ..
-RUN cd build && make
-
-RUN dnf update -y && \
-    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel && \
-    dnf clean all
-
-
-# Set the working directory for the build
-WORKDIR /app/huenicorn
-
-# Create a build directory and navigate into it
-RUN mkdir build && cd build
-
-# Configure the build with CMake
-RUN cd build && cmake ..
-
-# Compile the project
 RUN cd build && make
 
 # --- Stage 2: Final Bootc Image ---
@@ -116,19 +96,50 @@ FROM ghcr.io/ublue-os/bazzite-deck:latest
 # In a true Universal Blue template, you'd add these to a `packages` file or similar mechanism.
 # For a direct Containerfile build, we need to ensure these are present.
 # Let's assume the base Bazzite image *might* have some, but we'll explicitly install.
-RUN dnf install -y curl json-c libusbx-devel && \
+RUN dnf install -y \
+    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
+    && dnf update -y
+
+
+# 2. Install ONLY runtime dependencies for huenicorn in the final image.
+# These are the shared libraries that huenicorn needs to run.
+RUN dnf install -y \
+    curl \
+    json-c \
+    libusbx \
+    opencv \
+    asio \
+    mbedtls \
+    libX11 \
+    glib2 \
+    pipewire \
+    ffmpeg \
+    gstreamer1-plugins-base \
+    libva \
+    libvdpau \
+    mesa-libGL \
+    libdrm \
+    libXext \
+    libXrandr \
+    # glm and nlohmann-json are header-only, no extra runtime package needed here.
+    && \
     dnf clean all
+
 
 # Copy the compiled huenicorn executable from the 'builder' stage to the final image.
 # We'll place it in /usr/local/bin, a common location for custom binaries.
 # The 'huenicorn' executable is typically found in the 'build' directory after 'make'.
 COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
 
+# Copy the systemd service file and enable it.
+RUN mkdir -p /etc/systemd/system/
+
 # (Optional) Add a systemd service if you want huenicorn to run automatically at boot
 # For a command-line tool, this might not be necessary, but it shows how to enable services.
 # If you want it to run at boot, create 'my_bazzite_huenicorn/systemd/huenicorn.service'
 # and add:
-# COPY systemd/huenicorn.service /etc/systemd/system/huenicorn.service
+COPY systemd/huenicorn.service /etc/systemd/system/huenicorn.service
 RUN systemctl enable huenicorn.service
 
 # Validate the bootc image (highly recommended for bootc images)
@@ -138,7 +149,7 @@ RUN bootc container lint
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:latest
 # FROM ghcr.io/ublue-os/bluefin-nvidia:stable
-# 
+#
 # ... and so on, here are more base images
 # Universal Blue Images: https://github.com/orgs/ublue-os/packages
 # Fedora base image: quay.io/fedora/fedora-bootc:41
@@ -164,7 +175,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh && \
     ostree container commit
-    
+
 ### LINTING
 ## Verify final image and contents are correct.
 RUN bootc container lint
