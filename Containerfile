@@ -19,7 +19,7 @@ FROM registry.fedoraproject.org/fedora:latest AS builder
 # Install build dependencies for huenicorn AND OpenCV development files
 # 'opencv-devel' is the key package for CMake to find OpenCV.
 RUN dnf update -y && \
-    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusb-devel opencv-devel && \
+    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusb-1.0 opencv-devel && \
     dnf clean all
 
 # ... (rest of your huenicorn build steps) ...
@@ -66,7 +66,7 @@ FROM ghcr.io/ublue-os/bazzite-deck:latest
 # In a true Universal Blue template, you'd add these to a `packages` file or similar mechanism.
 # For a direct Containerfile build, we need to ensure these are present.
 # Let's assume the base Bazzite image *might* have some, but we'll explicitly install.
-RUN dnf install -y curl json-c libusb && \
+RUN dnf install -y curl json-c libusb-1.0 && \
     dnf clean all
 
 # Copy the compiled huenicorn executable from the 'builder' stage to the final image.
