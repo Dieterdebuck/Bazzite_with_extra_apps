@@ -82,7 +82,7 @@ RUN dnf install -y \
 # Let's remove 'asio' from the runtime install list, as the build error "No match for argument: asio"
 # suggests a dedicated runtime package 'asio' does not exist.
 # The 'asio-devel' package *does* provide the necessary headers and static libs for linking.
-RUN dnf install -y \
+RUN dnf install -y --skip-unavailable \
     ffmpeg \             # Likely needed
     gstreamer1-plugins-base \ # Likely needed
     libva \              # Likely needed
