@@ -55,12 +55,10 @@ RUN dnf update -y && \
     && \
     dnf clean all
 
-RUN dnf install -y curl && curl -vvv https://github.com/mbedt/huenicorn.git
-
 # Set the working directory inside the builder container for huenicorn's source code.
 WORKDIR /app/huenicorn
 # Clone the huenicorn source code from its Git repository.
-RUN git clone https://github.com/mbedt/huenicorn.git /app/huenicorn
+RUN git clone https://github.com/mbedt/huenicorn /app/huenicorn
 # Create a 'build' directory, navigate into it, configure the build with CMake, and then compile the project with Make.
 WORKDIR /app/huenicorn
 RUN mkdir build && cd build && cmake .. && make
