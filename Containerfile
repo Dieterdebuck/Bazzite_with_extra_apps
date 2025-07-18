@@ -25,7 +25,29 @@ COPY files/ /
 # Install build dependencies for huenicorn AND OpenCV development files
 # 'opencv-devel' is the key package for CMake to find OpenCV.
 RUN dnf update -y && \
-    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusbx-devel opencv-devel asio-devel nlohmann-json-devel mbedtls-devel libX11-devel libX11-devel glib2-devel pipewire-devel && \
+    dnf install -y \
+        git \
+        cmake \
+        gcc-c++ \
+        make \
+        pkgconfig \
+        curl-devel \
+        json-c-devel \
+        libusbx-devel \
+        opencv-devel \
+        asio-devel \
+        nlohmann-json-devel \
+        mbedtls-devel \
+        libX11-devel \
+        glib2-devel \
+        pipewire-devel \
+        ffmpeg-devel \
+        gstreamer1-plugins-base-devel \
+        libva-devel \
+        libvdpau-devel \
+        mesa-libGL-devel \
+        libdrm-devel \
+        libXext-devel && \
     dnf clean all
 
     # --- DEBUGGING COMMANDS START HERE ---
