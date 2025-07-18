@@ -47,7 +47,8 @@ RUN dnf update -y && \
         libvdpau-devel \
         mesa-libGL-devel \
         libdrm-devel \
-        libXext-devel && \
+        libXext-devel \
+    && \
     dnf clean all
 
     # --- DEBUGGING COMMANDS START HERE ---
