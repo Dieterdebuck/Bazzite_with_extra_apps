@@ -22,6 +22,22 @@ RUN dnf update -y && \
     dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusbx-devel opencv-devel && \
     dnf clean all
 
+    # --- DEBUGGING COMMANDS START HERE ---
+# List contents of /usr/share/cmake to see if OpenCV config files are there
+RUN ls -l /usr/share/cmake/OpenCV || true
+RUN ls -l /usr/share/opencv || true
+
+# Check if required libraries are installed and where they are
+RUN dnf list installed | grep -E "curl|json-c|libusbx|opencv" || true
+
+# Check CMake version
+RUN cmake --version
+
+# Print current working directory and contents before cmake
+RUN pwd && ls -la
+
+# --- DEBUGGING COMMANDS END HERE ---
+
 # ... (rest of your huenicorn build steps) ...
 WORKDIR /app/huenicorn
 RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git .
