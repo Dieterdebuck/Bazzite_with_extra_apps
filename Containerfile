@@ -83,7 +83,7 @@ RUN dnf install -y \
 # suggests a dedicated runtime package 'asio' does not exist.
 # The 'asio-devel' package *does* provide the necessary headers and static libs for linking.
 RUN dnf install -y \
-    opencv \             # Likely needed, base might not have it
+    opencv-devel \             # Likely needed, base might not have it
     ffmpeg \             # Likely needed
     gstreamer1-plugins-base \ # Likely needed
     libva \              # Likely needed
