@@ -55,7 +55,7 @@ RUN dnf update -y && \
     && \
     dnf clean all
 
-curl -vvv https://github.com/mbedt/huenicorn.git
+RUN dnf install -y curl && curl -vvv https://github.com/mbedt/huenicorn.git
 
 # Set the working directory inside the builder container for huenicorn's source code.
 WORKDIR /app/huenicorn
