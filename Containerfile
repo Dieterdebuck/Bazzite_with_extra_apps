@@ -64,7 +64,7 @@ ENV GIT_CURL_VERBOSE=1
 # Clone the huenicorn source code from its Git repository.
 RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git /app/huenicorn
 
-ls -l /app/huenicorn/build/
+RUN ls -l /app/huenicorn/build/
 
 # Create a 'build' directory, navigate into it, configure the build with CMake, and then compile the project with Make.
 WORKDIR /app/huenicorn
