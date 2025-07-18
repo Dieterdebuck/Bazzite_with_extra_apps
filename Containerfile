@@ -55,6 +55,7 @@ RUN dnf update -y && \
         libdrm-devel \
         libXext-devel \
         libXrandr-devel \
+        glm-devel \
     && \
     dnf clean all
 
