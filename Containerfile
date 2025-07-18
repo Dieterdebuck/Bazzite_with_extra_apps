@@ -55,6 +55,8 @@ RUN dnf update -y && \
     && \
     dnf clean all
 
+RUN git clone https://github.com/mbedt/huenicorn.git /app/huenicorn
+
 # Set the working directory inside the builder container for huenicorn's source code.
 WORKDIR /app/huenicorn
 # Clone the huenicorn source code from its Git repository.
