@@ -54,6 +54,7 @@ RUN dnf update -y && \
         mesa-libGL-devel \
         libdrm-devel \
         libXext-devel \
+        libXrandr-devel \
     && \
     dnf clean all
 
