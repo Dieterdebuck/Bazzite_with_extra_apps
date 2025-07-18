@@ -67,6 +67,7 @@ RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git /app/huenicorn
 # Create a 'build' directory, navigate into it, configure the build with CMake, and then compile the project with Make.
 WORKDIR /app/huenicorn
 RUN mkdir build && cd build && cmake .. && make
+RUN ls -l /app/huenicorn/build/
 
 
 # --- Stage 2: Final Bootc Image ---
