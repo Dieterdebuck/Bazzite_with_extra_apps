@@ -80,17 +80,12 @@ FROM ghcr.io/ublue-os/bazzite-deck:latest
 
 # Copy the compiled huenicorn executable from the 'builder' stage to the final image.
 COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
-# Copy the compiled huenicorn executable to /usr/local/bin.
-COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
 
 # Copy the webroot directory to a shared location where the service can find it.
 COPY --from=builder /app/huenicorn/webroot /usr/local/share/huenicorn/webroot
 
-# Copy the systemd service file.
-COPY systemd/huenicorn.service /etc/systemd/system/huenicorn.service
-
 # Set up the systemd service for huenicorn.
-RUN mkdir -p /etc/systemd/system/
+RUN mkdir -p /etc/systemd/system/ # Only needed if /etc/systemd/system/ doesn't exist, but safe to keep.
 COPY systemd/huenicorn.service /etc/systemd/system/huenicorn.service
 RUN systemctl enable huenicorn.service
 
