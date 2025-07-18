@@ -13,6 +13,10 @@ FROM registry.fedoraproject.org/fedora:latest AS builder
 # We use 'dnf' as Fedora is the base for Bazzite.
 # 'gcc-c++' for the C++ compiler, 'git' for cloning, 'cmake' for configuration, 'make' for building.
 # '-devel' packages provide the necessary header files and static libraries for compilation.
+RUN dnf update -y && \
+    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusb-devel && \
+    dnf clean all
+
 
 # Set the working directory for the build
 WORKDIR /app/huenicorn
@@ -59,7 +63,7 @@ COPY --from=builder /app/huenicorn/build/huenicorn /usr/local/bin/huenicorn
 # If you want it to run at boot, create 'my_bazzite_huenicorn/systemd/huenicorn.service'
 # and add:
 # COPY systemd/huenicorn.service /etc/systemd/system/huenicorn.service
-# RUN systemctl enable huenicorn.service
+RUN systemctl enable huenicorn.service
 
 # Validate the bootc image (highly recommended for bootc images)
 # This command checks for common issues that might prevent the image from booting correctly.
