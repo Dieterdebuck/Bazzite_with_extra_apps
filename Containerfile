@@ -57,8 +57,13 @@ RUN dnf update -y && \
 
 # Set the working directory inside the builder container for huenicorn's source code.
 WORKDIR /app/huenicorn
+
+# Set environment variables for more verbose git output and to prevent interactive prompts
+ENV GIT_TERMINAL_PROMPT=0
+ENV GIT_CURL_VERBOSE=1
 # Clone the huenicorn source code from its Git repository.
 RUN git clone https://github.com/mbedt/huenicorn /app/huenicorn
+
 # Create a 'build' directory, navigate into it, configure the build with CMake, and then compile the project with Make.
 WORKDIR /app/huenicorn
 RUN mkdir build && cd build && cmake .. && make
