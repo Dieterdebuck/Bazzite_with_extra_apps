@@ -1,0 +1,11 @@
+[Unit]
+Description=Huenicorn Philips Hue CLI Tool
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/huenicorn # Replace with the actual command and arguments
+Type=simple # Or 'oneshot' if it runs and exits, 'forking' if it daemonizes
+Restart=on-failure # Optional: restart if it crashes
+
+[Install]
+WantedBy=multi-user.target

@@ -12,6 +12,18 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
+# Required dependencies
+dnf5 install -y git cmake gcc gcc-c++ opencv-devel json-devel asio-devel curl-devel mbedtls-devel glm-devel
+
+# For X11 support
+dnf5 install -y libXrandr-devel
+# For Wayland support
+dnf5 install -y pipewire-devel glib2-devel
+
+
+
+
+
 # Use a COPR Example:
 #
 # dnf5 -y copr enable ublue-os/staging
