@@ -14,7 +14,7 @@ FROM registry.fedoraproject.org/fedora:latest AS builder
 # 'gcc-c++' for the C++ compiler, 'git' for cloning, 'cmake' for configuration, 'make' for building.
 # '-devel' packages provide the necessary header files and static libraries for compilation.
 RUN dnf update -y && \
-    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel libusb-devel && \
+    dnf install -y git cmake gcc-c++ make curl-devel json-c-devel && \
     dnf clean all
 
 
