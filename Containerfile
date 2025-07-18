@@ -90,9 +90,6 @@ RUN dnf update -y && \
 # Set the working directory for the build
 WORKDIR /app/huenicorn
 
-# Clone the huenicorn repository
-RUN git clone https://gitlab.com/openjowelsofts/huenicorn.git .
-
 # Create a build directory and navigate into it
 RUN mkdir build && cd build
 
